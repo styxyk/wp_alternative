@@ -1,3 +1,3 @@
-# wp_alternative
+# file location:
 
-file location: wp-content/themes/news-pro/functions.php
+wp-content/themes/news-pro/functions.php
