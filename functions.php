@@ -222,6 +222,30 @@ if ( is_single() ) { ?>
 
 add_shortcode('post_share2', 'post_share_shortcode2');
 function post_share_shortcode2() {
+
+$memcache_obj = new Memcache;
+$memcache_obj->connect('localhost', 11211) or die ("Could not connect to Memcached server!");
+
+$cacheTime = 60*60*12; // 12 hours
+
+$pinterest_pins_count = $memcache_obj->get( 'pinterest_pins_count' );
+if ( false === $pinterest_pins_count ) {
+    $pinterest_pins_count = pinterest_get_pins(get_permalink());
+    $memcache_obj->set( 'pinterest_pins_count', $pinterest_pins_count , 0, $cacheTime );
+}
+
+$twitter_tweets_count = $memcache_obj->get( '$twitter_tweets_count' );
+if ( false === $twitter_tweets_count ) {
+    $twitter_tweets_count = twitter_get_tweets(get_permalink());
+    $memcache_obj->set( '$twitter_tweets_count', $twitter_tweets_count , 0, $cacheTime );
+}
+
+$google_plus_likes = $memcache_obj->get( 'google_plus_likes' );
+if ( false === $google_plus_likes ) {
+    $google_plus_likes = google_get_plusones(get_permalink());
+    $memcache_obj->set( 'google_plus_likes', $google_plus_likes , 0, $cacheTime ); 
+}
+
 if ( is_single() ) { ?> 
 <div class="social-sharer-bottom">
 <!-- Article Views Counter -->
@@ -232,11 +256,11 @@ if ( is_single() ) { ?>
 <!-- Twitter Share -->
 <a style='text-decoration:none;' type="icon_link" onClick="window.open('http://twitter.com/home?status=<?php print(urlencode(the_title())); ?>+<?php print(urlencode(get_permalink())); ?>','sharer','toolbar=0,status=0,width=580,height=325');" href="javascript: void(0)"><div class="share-twitter">
 <div class="share-text-twitter"><img class="tweet-icon" src="/wp-content/themes/news-pro/images/tweeter.png" alt="tweet"><div class="longtext"> Tweet</div> 
-<?php echo twitter_get_tweets(get_permalink()); ?></div></div></a>
+<?php echo $twitter_tweets_count; ?></div></div></a>
 <!-- Google Plus Share -->
-<a style='text-decoration:none;' type="icon_link" onClick="window.open('https://plus.google.com/share?url=<?php print(urlencode(get_permalink())); ?>','sharer','toolbar=0,status=0,width=580,height=325');" href="javascript: void(0)"><div class="share-google"><div class="share-text-google"><img class="gplus-icon" src="/wp-content/themes/news-pro/images/gplus.png" alt="gplus"><div class="longtext-google"> Share </div><?php echo google_get_plusones(get_permalink()); ?></div></div></a>
+<a style='text-decoration:none;' type="icon_link" onClick="window.open('https://plus.google.com/share?url=<?php print(urlencode(get_permalink())); ?>','sharer','toolbar=0,status=0,width=580,height=325');" href="javascript: void(0)"><div class="share-google"><div class="share-text-google"><img class="gplus-icon" src="/wp-content/themes/news-pro/images/gplus.png" alt="gplus"><div class="longtext-google"> Share </div><?php echo $google_plus_likes; ?></div></div></a>
 <!-- Pinterest Share -->
-<a style='text-decoration:none;' type="icon_link" onClick="window.open('//www.pinterest.com/pin/create/button/?url=<?php print(urlencode(get_permalink())); ?>&media=<?php $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'medium' );$url = $thumb['0']; echo $url; ?>&description=<?php print(urlencode(the_title())); ?>','sharer','toolbar=0,status=0,width=580,height=325');" href="javascript: void(0)"><div class="share-pinterest"><div class="share-text"><div class="dashicons dashicons-pinterest"><div class="entry-socials"><img class="pin-icon" src="/wp-content/themes/news-pro/images/pinterest.png" alt="pinit"></div></div><div class="longtext"> Pin it</div> <?php echo pinterest_get_pins(get_permalink()); ?></div></div></a>
+<a style='text-decoration:none;' type="icon_link" onClick="window.open('//www.pinterest.com/pin/create/button/?url=<?php print(urlencode(get_permalink())); ?>&media=<?php $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'medium' );$url = $thumb['0']; echo $url; ?>&description=<?php print(urlencode(the_title())); ?>','sharer','toolbar=0,status=0,width=580,height=325');" href="javascript: void(0)"><div class="share-pinterest"><div class="share-text"><div class="dashicons dashicons-pinterest"><div class="entry-socials"><img class="pin-icon" src="/wp-content/themes/news-pro/images/pinterest.png" alt="pinit"></div></div><div class="longtext"> Pin it</div> <?php echo $pinterest_pins_count; ?></div></div></a>
 </div>
 <?php }
 }
