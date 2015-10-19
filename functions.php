@@ -228,6 +228,8 @@ $memcache_obj->connect('localhost', 11211) or die ("Could not connect to Memcach
 
 $cacheTime = 60*60*12; // 12 hours
 
+$t1 = microtime(1);
+
 $pinterest_pins_count = $memcache_obj->get( 'pinterest_pins_count' );
 if ( false === $pinterest_pins_count ) {
     $pinterest_pins_count = pinterest_get_pins(get_permalink());
@@ -245,6 +247,9 @@ if ( false === $google_plus_likes ) {
     $google_plus_likes = google_get_plusones(get_permalink());
     $memcache_obj->set( 'google_plus_likes', $google_plus_likes , 0, $cacheTime ); 
 }
+
+$t1 = microtime(1) - $t1;
+echo '<!-- optimization time: '.$t1.' -->';
 
 if ( is_single() ) { ?> 
 <div class="social-sharer-bottom">
